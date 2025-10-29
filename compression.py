@@ -1,23 +1,16 @@
-# compression.py (Updated)
 import zlib
 import tarfile
 import io
 
 def compress(data: bytes) -> bytes:
-    """Compresses the given data using zlib."""
     print("[*] Compressing data...")
     return zlib.compress(data)
 
 def decompress(data: bytes) -> bytes:
-    """Decompresses the given zlib-compressed data."""
     print("[*] Decompressing data...")
     return zlib.decompress(data)
 
 def compress_multiple(file_paths: list) -> bytes:
-    """
-    Bundles multiple files into an in-memory tar archive and then compresses it.
-    Returns the compressed byte string of the archive.
-    """
     print("[*] Bundling and compressing multiple files...")
     tar_buffer = io.BytesIO()
     

@@ -4,7 +4,7 @@ from tkinter import filedialog
 def select_file_to_open(title="Select a file", multiple=False):
     """
     Opens a file dialog for the user to select a file or files to read/open.
-    Returns the full path to the selected file, a tuple of paths, or None if cancelled.
+    Returns the full path to the selected file, a list of paths, or None if cancelled.
     """
     root = tk.Tk()
     root.withdraw()
@@ -12,19 +12,25 @@ def select_file_to_open(title="Select a file", multiple=False):
     
     file_paths = filedialog.askopenfilenames(
         title=title,
-        filetypes=[("All Files", "."), ("Text Files", ".txt"), ("Encrypted Files", ".enc")],
+        filetypes=[
+            ("All Files", "*.*"), 
+            ("Gzip Files", "*.gz"), 
+            ("Tar Archives", "*.tar.gz"), 
+            ("Encrypted Files", "*.enc"),
+            ("Signature Files", "*.sig"), # <-- ADDED THIS LINE
+            ("Text Files", "*.txt")
+        ],
         multiple=multiple
     )
     
     root.destroy()
     
-    # If multiple is True, it always returns a tuple (can be empty).
-    # If not, it returns a single string or an empty string.
     if multiple:
         return list(file_paths) if file_paths else None
     else:
         return file_paths[0] if file_paths else None
 
+# ... (select_file_to_save and select_directory functions remain the same) ...
 def select_file_to_save(default_filename="output", title="Save file as..."):
     """
     Opens a file dialog for the user to choose a location and name to save a file.
@@ -38,7 +44,13 @@ def select_file_to_save(default_filename="output", title="Save file as..."):
         title=title,
         initialfile=default_filename,
         defaultextension=".bin",
-        filetypes=[("All Files", "."), ("Binary Files", ".bin"), ("Encrypted Files", ".enc"), ("Archive Files", "*.tar.gz")]
+        filetypes=[
+            ("All Files", "*.*"), 
+            ("Binary Files", "*.bin"), 
+            ("Encrypted Files", "*.enc"), 
+            ("Archive Files", "*.tar.gz"),
+            ("Gzip Files", "*.gz")
+        ]
     )
     
     root.destroy()
