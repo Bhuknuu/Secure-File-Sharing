@@ -1,8 +1,7 @@
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+import secrets
 
-# IMPORTANT: This is a temporary, hardcoded 32-byte key.
-# In a real application, this key will be generated through ECDH.
-KEY = b'oh-super-secret-32-byte-long-key!!'
+KEY = b'oh-my-super-secret-32-byte-key!!' # temporary hardcoded 32-byte key.
 
 def encrypt(data: bytes) -> bytes:
     """
@@ -11,10 +10,9 @@ def encrypt(data: bytes) -> bytes:
     """
     print("[*] Encrypting data with AES-GCM...")
     aesgcm = AESGCM(KEY)
-    # A nonce (Number used once) is required for GCM. 12 bytes is a standard size.
-    nonce = AESGCM.generate_nonce(bit_length=96)
-    ciphertext = aesgcm.encrypt(nonce, data, None) # 'None' for additional authenticated data
-    # We must store the nonce alongside the ciphertext to decrypt it later.
+    
+    nonce = secrets.token_bytes(12)
+    ciphertext = aesgcm.encrypt(nonce, data, None)
     return nonce + ciphertext
 
 def decrypt(encrypted_data: bytes) -> bytes:
@@ -25,8 +23,8 @@ def decrypt(encrypted_data: bytes) -> bytes:
     """
     print("[*] Decrypting data with AES-GCM...")
     try:
-        aesgcm = AESGCM(KEY)
-        # Extract the nonce from the first 12 bytes
+        aesgcm = AESGCM(KEY) 
+        ''' Extract the nonce from the first 12 bytes'''
         nonce = encrypted_data[:12]
         ciphertext = encrypted_data[12:]
         decrypted_data = aesgcm.decrypt(nonce, ciphertext, None)
