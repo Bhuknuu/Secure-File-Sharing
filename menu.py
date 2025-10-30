@@ -100,12 +100,31 @@ def run():#menu
             except Exception as e:
                 print(f"[!] An error occurred: {e}")
                 wait_to_continue()
+            
+        elif choice == '6':
+            input_file = select_file_to_open("Select a file to sign")
+            if not input_file: continue
+            try:
+                with open(input_file, 'rb') as f:
+                    data = f.read()
+                sig = sign(data)
+                
+                sig_file = os.path.splitext(input_file)[0] + ".sig"
+                with open(sig_file, 'w') as f:
+                    f.write(sig)
+                print(f"[+] Signature created and saved to {sig_file}")
+                wait_to_continue()
+            except Exception as e:
+                print(f"[!] An error occurred: {e}")
+                wait_to_continue()
+
 
         elif choice == '7':
+            print("Select the original file to verify")
             input_file = select_file_to_open("Select the original file to verify")
             if not input_file: continue
             
-            
+            print("Select the corresponding signature file (.sig)")
             sig_file = select_file_to_open("Select the corresponding signature file (.sig)")
             if not sig_file:
                 print("[!] No signature file selected. Aborting verification.")
