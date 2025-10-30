@@ -2,10 +2,6 @@ import tkinter as tk
 from tkinter import filedialog
 
 def select_file_to_open(title="Select a file", multiple=False):
-    """
-    Opens a file dialog for the user to select a file or files to read/open.
-    Returns the full path to the selected file, a list of paths, or None if cancelled.
-    """
     root = tk.Tk()
     root.withdraw()
     root.attributes('-topmost', True)
@@ -17,7 +13,7 @@ def select_file_to_open(title="Select a file", multiple=False):
             ("Gzip Files", "*.gz"), 
             ("Tar Archives", "*.tar.gz"), 
             ("Encrypted Files", "*.enc"),
-            ("Signature Files", "*.sig"), # <-- ADDED THIS LINE
+            ("Signature Files", "*.sig"), # <- ADDED THIS LINE
             ("Text Files", "*.txt")
         ],
         multiple=multiple
@@ -30,12 +26,7 @@ def select_file_to_open(title="Select a file", multiple=False):
     else:
         return file_paths[0] if file_paths else None
 
-# ... (select_file_to_save and select_directory functions remain the same) ...
 def select_file_to_save(default_filename="output", title="Save file as..."):
-    """
-    Opens a file dialog for the user to choose a location and name to save a file.
-    Returns the full path for the new file, or None if cancelled.
-    """
     root = tk.Tk()
     root.withdraw()
     root.attributes('-topmost', True)
@@ -57,11 +48,7 @@ def select_file_to_save(default_filename="output", title="Save file as..."):
     
     return file_path if file_path else None
 
-def select_directory(title="Select a directory"):
-    """
-    Opens a dialog for the user to select a directory.
-    Returns the path to the directory, or None if cancelled.
-    """
+def select_directory(title="Select a directory"): # to open select directory dialog.
     root = tk.Tk()
     root.withdraw()
     root.attributes('-topmost', True)

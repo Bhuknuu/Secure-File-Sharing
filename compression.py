@@ -1,6 +1,7 @@
 import zlib
 import tarfile
 import io
+import os
 
 def compress(data: bytes) -> bytes:
     print("[*] Compressing data...")
@@ -17,8 +18,8 @@ def compress_multiple(file_paths: list) -> bytes:
     with tarfile.open(fileobj=tar_buffer, mode='w:gz') as tar:
         for file_path in file_paths:
             try:
-                # Add file to the tar archive, using just the filename to avoid full paths
                 tar.add(file_path, arcname=os.path.basename(file_path))
+                # Add file to the tar archive, using just the filename to avoid full paths
                 print(f"    - Added {os.path.basename(file_path)}")
             except FileNotFoundError:
                 print(f"[!] Warning: File not found and skipped: {file_path}")
@@ -29,9 +30,6 @@ def compress_multiple(file_paths: list) -> bytes:
     return compressed_data
 
 def decompress_multiple(data: bytes, output_dir: str):
-    """
-    Decompresses data and extracts it as a tar archive into the specified directory.
-    """
     print("[*] Decompressing and extracting archive...")
     try:
         tar_buffer = io.BytesIO(data)
@@ -44,5 +42,4 @@ def decompress_multiple(data: bytes, output_dir: str):
     except Exception as e:
         print(f"[!] An error occurred during decompression/extraction: {e}")
 
-# You'll need to import os for the basename function
-import os
+# Need to import OS library for the basename function 

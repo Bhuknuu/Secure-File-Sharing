@@ -4,17 +4,14 @@ from signature import sign, verify
 from aes_encryption import encrypt, decrypt
 from file_selector import select_file_to_open, select_file_to_save, select_directory
 
-def clear_screen():
-    """Clears the terminal screen."""
+def clear_screen():#cls or clear TO CLEAR SCREEN ofc duh
     os.system('cls' if os.name == 'nt' else 'clear')
 
-def wait_to_continue():
-    """Pauses the script and waits for the user to press Enter."""
+def wait_to_continue():#wait for user to press any key
     input("\nPress Enter to return to the menu...")
 
 
-def run():
-    """Displays the menu and handles user input."""
+def run():#menu
     while True:
         clear_screen()
         print("--- Secure File Toolkit ---")
@@ -31,18 +28,23 @@ def run():
 
 
         if choice == '1':
-            sub_choice = input("Compress (1) a single file or (2) multiple files into an archive? ")
+            sub_choice = input("Compress \n1. a single file \n2. multiple files into an archive ")
             if sub_choice == '1':
+                
                 input_file = select_file_to_open("Select a file to compress")
                 if not input_file: continue
+                
                 output_file = select_file_to_save(default_filename="compressed.gz", title="Save compressed file as...")
                 if not output_file: continue
+
                 process_file(compress, input_file, output_file)
             elif sub_choice == '2':
                 input_files = select_file_to_open("Select multiple files to compress", multiple=True)
-                if not input_files: continue
+                if not input_files: continue 
+
                 output_file = select_file_to_save(default_filename="archive.tar.gz", title="Save archive as...")
                 if not output_file: continue
+                
                 try:
                     compressed_data = compress_multiple(input_files)
                     with open(output_file, 'wb') as f:
@@ -56,8 +58,10 @@ def run():
         elif choice == '2':
             input_file = select_file_to_open("Select a compressed file to decompress")
             if not input_file: continue
+
             output_file = select_file_to_save(title="Save decompressed file as...")
             if not output_file: continue
+            
             process_file(decompress, input_file, output_file)
 
         elif choice == '3':
