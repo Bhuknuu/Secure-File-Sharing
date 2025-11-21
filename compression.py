@@ -2,6 +2,7 @@ import zlib
 import tarfile
 import io
 import os
+# Need to import OS library for the basename function 
 
 def compress(data: bytes) -> bytes:
     print("[*] Compressing data...")
@@ -41,5 +42,3 @@ def decompress_multiple(data: bytes, output_dir: str):
         tar_buffer.close()
     except Exception as e:
         print(f"[!] An error occurred during decompression/extraction: {e}")
-
-# Need to import OS library for the basename function 
