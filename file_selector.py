@@ -13,7 +13,7 @@ def select_file_to_open(title="Select a file", multiple=False):
             ("Gzip Files", "*.gz"), 
             ("Tar Archives", "*.tar.gz"), 
             ("Encrypted Files", "*.enc"),
-            ("Signature Files", "*.sig"), # <- ADDED THIS LINE
+            ("Signature Files", "*.sig"), 
             ("Text Files", "*.txt")
         ],
         multiple=multiple
