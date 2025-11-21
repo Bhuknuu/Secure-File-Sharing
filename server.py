@@ -2,17 +2,88 @@ from flask import Flask, request, jsonify, send_file
 import os
 import uuid
 from datetime import datetime
+import json
 
 app = Flask(__name__)
 
 UPLOAD_FOLDER = 'server_storage'
+USERS_FILE = 'users_db.json'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 files_db = {}
+users_db = {}
+
+def load_users():
+    global users_db
+    if os.path.exists(USERS_FILE):
+        with open(USERS_FILE, 'r') as f:
+            users_db = json.load(f)
+
+def save_users():
+    with open(USERS_FILE, 'w') as f:
+        json.dump(users_db, f, indent=2)
+
+load_users()
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
     return jsonify({"status": "healthy", "timestamp": datetime.now().isoformat()})
+
+@app.route('/api/auth/register', methods=['POST'])
+def register():
+    try:
+        data = request.json
+        username = data.get('username')
+        password_hash = data.get('password_hash')
+        public_key = data.get('public_key')
+        
+        if username in users_db:
+            return jsonify({"error": "User already exists"}), 400
+        
+        users_db[username] = {
+            'password_hash': password_hash,
+            'public_key': public_key,
+            'created_at': datetime.now().isoformat()
+        }
+        save_users()
+        
+        print(f"[+] New user registered: {username}")
+        return jsonify({"message": "User registered successfully", "public_key": public_key}), 200
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/auth/login', methods=['POST'])
+def login():
+    try:
+        data = request.json
+        username = data.get('username')
+        password_hash = data.get('password_hash')
+        
+        if username not in users_db:
+            return jsonify({"error": "User not found"}), 404
+        
+        if users_db[username]['password_hash'] != password_hash:
+            return jsonify({"error": "Invalid password"}), 401
+        
+        print(f"[+] User logged in: {username}")
+        return jsonify({
+            "message": "Login successful",
+            "public_key": users_db[username]['public_key']
+        }), 200
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/users/<username>/public_key', methods=['GET'])
+def get_user_public_key(username):
+    if username in users_db:
+        return jsonify({"public_key": users_db[username]['public_key']}), 200
+    return jsonify({"error": "User not found"}), 404
+
+@app.route('/api/users/list', methods=['GET'])
+def list_users():
+    return jsonify({"users": list(users_db.keys())}), 200
 
 @app.route('/api/upload', methods=['POST'])
 def upload_file():
@@ -50,6 +121,7 @@ def upload_file():
         }), 200
         
     except Exception as e:
+        print(f"[!] Upload error: {e}")
         return jsonify({"error": str(e)}), 500
 
 @app.route('/api/files/<recipient>', methods=['GET'])
@@ -93,6 +165,7 @@ def delete_file(file_id):
         os.remove(file_info['file_path'])
         os.remove(file_info['sig_path'])
         del files_db[file_id]
+        print(f"[+] File deleted: {file_id}")
         return jsonify({"message": "File deleted successfully"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -103,6 +176,7 @@ if __name__ == '__main__':
     print("="*50)
     print("Server starting on http://localhost:5000")
     print("Storage location:", UPLOAD_FOLDER)
+    print("Users database:", USERS_FILE)
     print("="*50 + "\n")
     
     try:
