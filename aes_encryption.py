@@ -2,25 +2,13 @@ from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 import struct
 
-# ============================================
-# PART 1: GALOIS FIELD MATHEMATICS (GF(2^128))
-# ============================================
-
 def gf_multiply(x, y):
-    """
-    Multiply two numbers in Galois Field GF(2^128)
-    This is the core math behind GHASH authentication
-    
-    Why needed? To mix data for authentication tag
-    How it works? Polynomial multiplication with XOR instead of addition
-    """
     result = 0
     
     for i in range(128):
         # If bit i of y is set, XOR result with x
         if y & (1 << (127 - i)):
             result ^= x
-        
         # Check if leftmost bit of x is 1
         if x & 1:
             x = (x >> 1) ^ 0xE1000000000000000000000000000000  # Reduction polynomial
@@ -30,47 +18,22 @@ def gf_multiply(x, y):
     return result
 
 def bytes_to_int(data):
-    """Convert bytes to 128-bit integer"""
     return int.from_bytes(data, byteorder='big')
 
 def int_to_bytes(num):
-    """Convert 128-bit integer to bytes"""
     return num.to_bytes(16, byteorder='big')
 
-# ============================================
-# PART 2: GHASH (Authentication Function)
-# ============================================
-
 class GHASH:
-    """
-    GHASH - The authentication part of GCM
-    Creates a tag that proves data integrity
-    
-    Formula: GHASH(H, A, C) where:
-    - H = encryption of zero block (auth key)
-    - A = additional authenticated data (we don't use this)
-    - C = ciphertext
-    """
     
     def __init__(self, h_key):
-        """h_key is the hash subkey (encrypted zero block)"""
         self.h = bytes_to_int(h_key)
     
     def compute(self, ciphertext):
-        """
-        Compute GHASH of ciphertext
-        Steps:
-        1. Split ciphertext into 16-byte blocks
-        2. Mix each block using GF multiplication
-        3. Return final authentication hash
-        """
         # Start with zero
-        y = 0
-        
+        y = 0        
         # Process ciphertext in 16-byte blocks
         for i in range(0, len(ciphertext), 16):
             block = ciphertext[i:i+16]
-            
             # Pad last block if needed
             if len(block) < 16:
                 block = block + b'\x00' * (16 - len(block))
@@ -87,25 +50,10 @@ class GHASH:
         
         return int_to_bytes(y)
 
-# ============================================
-# PART 3: CTR MODE (Counter Mode Encryption)
-# ============================================
-
 class CTR_Mode:
-    """
-    Counter Mode - turns block cipher into stream cipher
-    Instead of encrypting data directly, we:
-    1. Encrypt a counter value
-    2. XOR encrypted counter with plaintext
-    
-    Why? Fast, parallelizable, no padding needed!
-    """
     
     def __init__(self, cipher, nonce):
-        """
-        cipher: AES cipher object
-        nonce: 12-byte random value
-        """
+
         self.cipher = cipher
         # Counter format: [nonce 12 bytes][counter 4 bytes]
         self.nonce = nonce
@@ -120,14 +68,6 @@ class CTR_Mode:
         self.counter = (self.counter + 1) & 0xFFFFFFFF
     
     def encrypt(self, plaintext):
-        """
-        Encrypt plaintext using CTR mode
-        Process:
-        1. Encrypt counter block
-        2. XOR with plaintext block
-        3. Increment counter
-        4. Repeat
-        """
         ciphertext = bytearray()
         
         # Process in 16-byte blocks
@@ -148,15 +88,7 @@ class CTR_Mode:
         return bytes(ciphertext)
     
     def decrypt(self, ciphertext):
-        """
-        Decrypt is same as encrypt in CTR mode!
-        XOR is its own inverse: (A XOR B) XOR B = A
-        """
         return self.encrypt(ciphertext)  # Same operation!
-
-# ============================================
-# PART 4: AES-GCM (Putting It All Together)
-# ============================================
 
 class MyAESGCM:
     """
